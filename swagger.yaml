@@ -117,6 +117,7 @@ definitions:
         - name
         - email
         - password
+        - role
     properties:
       id:
         type: string
@@ -129,6 +130,10 @@ definitions:
         description: user Email
       password:
         type: string
+        description: user Password
+      role:
+        type: string
+        enum: ['USER', 'ADMIN', 'COORDINATOR']
         description: user Password
 
 schemes:

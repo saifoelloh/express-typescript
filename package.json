@@ -1,8 +1,8 @@
 {
   "name": "myapp",
   "version": "0.0.0",
-  "description": "TypeScript + Prisma + MySQL + Express API Server",
-  "author": "",
+  "description": "TypeScript + Prisma + PostgreSQL + Express API Server",
+  "author": "saifoelloh | saifoelloh@gmail.com",
   "license": "ISC",
   "scripts": {
     "start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
