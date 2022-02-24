@@ -8,10 +8,14 @@ class CategoriesController {
 
   public getCategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const filter = req.query?.filter || {};
-      let pagination = {};
+      let pagination = {},
+        filter = {};
       if (req.query?.pagination) {
         pagination = JSON.parse(req.query.pagination);
+      }
+
+      if (req.query?.filter) {
+        filter = JSON.parse(req.query.filter);
       }
 
       const findAllCategorysData: Category[] = await this.categoryService.findAllCategory(pagination, filter);

@@ -23,7 +23,7 @@ class UserService {
     if (isEmpty(userId)) throw new HttpException(400, "You're not userId");
 
     const findUser: User = await this.users.findFirst({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "You're not user");
+    if (!findUser) throw new HttpException(404, 'Not Found');
 
     return findUser;
   }
@@ -43,7 +43,7 @@ class UserService {
     if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
 
     const findUser: User = await this.users.findUnique({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "You're not user");
+    if (!findUser) throw new HttpException(404, 'Not Found');
 
     const hashedPassword = await hash(userData.password, 10);
     const updateUserData = await this.users.update({ where: { id: userId }, data: { ...userData, password: hashedPassword } });
@@ -54,7 +54,7 @@ class UserService {
     if (isEmpty(userId)) throw new HttpException(400, "You're not userId");
 
     const findUser: User = await this.users.findUnique({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "You're not user");
+    if (!findUser) throw new HttpException(404, 'Not Found');
 
     const deleteUserData = await this.users.delete({ where: { id: userId } });
     return deleteUserData;
