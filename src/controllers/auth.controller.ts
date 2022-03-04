@@ -1,20 +1,26 @@
 import { NextFunction, Request, Response } from 'express';
-import { LoginUserDto } from '@dtos/users.dto';
+import { CreateUserDto, LoginUserDto } from '@dtos/users.dto';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import AuthService from '@services/auth.service';
 import UserService from '@/services/users.service';
-import { compare } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { HttpException } from '@/exceptions/HttpException';
 import _ from 'lodash';
+import { User } from '@prisma/client';
 
 class AuthController {
   private authService = new AuthService();
   private userService = new UserService();
 
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { password, ...body } = req.body as CreateUserDto;
     try {
-      const user = await this.userService.createUser(req.body);
-      res.status(201).json({ data: user, message: 'Success create new user' });
+      const findUser = await this.userService.findUserBy({ key: 'email', value: body.email });
+      if (!_.isEmpty(findUser)) throw new HttpException(409, 'Conflict');
+
+      const hashedPassword = await hash(password, 10);
+      const data: User = await this.userService.createUser({ ...body, password: hashedPassword });
+      res.status(201).json({ data, message: 'created' });
     } catch (error) {
       next(error);
     }
@@ -24,6 +30,7 @@ class AuthController {
     try {
       const { email, password } = req.body as LoginUserDto;
       const user = await this.userService.findUserBy({ key: 'email', value: email });
+      if (_.isEmpty(user)) throw new HttpException(404, 'Not Found');
 
       const isPasswordMatching: boolean = await compare(password, user.password);
       if (!isPasswordMatching) throw new HttpException(409, "You're password not matching");
