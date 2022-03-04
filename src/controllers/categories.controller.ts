@@ -2,6 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import { Category } from '@prisma/client';
 import { CreateCategoryDto } from '@dtos/categories.dto';
 import CategoryService from '@services/categories.service';
+import { Pagination } from '@/interfaces/shared.interface';
+import _ from 'lodash';
+import { HttpException } from '@/exceptions/HttpException';
 
 class CategoriesController {
   public categoryService = new CategoryService();
@@ -11,16 +14,15 @@ class CategoriesController {
       let pagination = {},
         filter = {};
       if (req.query?.pagination) {
-        pagination = JSON.parse(req.query.pagination);
+        pagination = JSON.parse(req.query.pagination as string);
       }
 
       if (req.query?.filter) {
-        filter = JSON.parse(req.query.filter);
+        filter = JSON.parse(req.query.filter as string);
       }
 
-      const findAllCategorysData: Category[] = await this.categoryService.findAllCategory(pagination, filter);
-
-      res.status(200).json({ data: findAllCategorysData, message: 'findAll' });
+      const data = await this.categoryService.findAllCategory(pagination as Pagination<Category>, filter);
+      res.status(200).json({ data, message: 'findAll' });
     } catch (error) {
       next(error);
     }
@@ -28,31 +30,38 @@ class CategoriesController {
 
   public getCategoryById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findOneCategoryData: Category = await this.categoryService.findCategoryById(req.params.id);
+      const findCategory = await this.categoryService.findCategoryBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findCategory)) throw new HttpException(404, 'Not Found');
 
-      res.status(200).json({ data: findOneCategoryData, message: 'findOne' });
+      res.status(200).json({ data: findCategory, message: 'findOne' });
     } catch (error) {
       next(error);
     }
   };
 
   public createCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userData: CreateCategoryDto = req.body;
-      const createCategoryData: Category = await this.categoryService.createCategory(userData);
+    const body = req.body as CreateCategoryDto;
 
-      res.status(201).json({ data: createCategoryData, message: 'created' });
+    try {
+      const findCategory = await this.categoryService.findCategoryBy({ key: 'name', value: body.name });
+      if (!_.isEmpty(findCategory)) throw new HttpException(409, 'Conflict');
+
+      const data = await this.categoryService.createCategory(body);
+      res.status(201).json({ data, message: 'created' });
     } catch (error) {
       next(error);
     }
   };
 
   public updateCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userData: CreateCategoryDto = req.body;
-      const updateCategoryData: Category = await this.categoryService.updateCategory(req.params.id, userData);
+    const body = req.body as CreateCategoryDto;
 
-      res.status(200).json({ data: updateCategoryData, message: 'updated' });
+    try {
+      const findCategory = await this.categoryService.findCategoryBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findCategory)) throw new HttpException(404, 'Not Found');
+
+      const data = await this.categoryService.updateCategory(findCategory.id, body);
+      res.status(200).json({ data, message: 'updated' });
     } catch (error) {
       next(error);
     }
@@ -60,9 +69,11 @@ class CategoriesController {
 
   public deleteCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const deleteCategoryData: Category = await this.categoryService.deleteCategory(req.params.id);
+      const findCategory = await this.categoryService.findCategoryBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findCategory)) throw new HttpException(404, 'Not Found');
 
-      res.status(200).json({ data: deleteCategoryData, message: 'deleted' });
+      const data = await this.categoryService.deleteCategory(req.params.id);
+      res.status(200).json({ data, message: 'deleted' });
     } catch (error) {
       next(error);
     }

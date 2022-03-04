@@ -7,3 +7,8 @@ export interface Pagination<T> {
   show: number;
   orderBy: OrderBy<T>[];
 }
+
+export interface FindOneOption<T> {
+  key: keyof T;
+  value: keyof typeof T;
+}

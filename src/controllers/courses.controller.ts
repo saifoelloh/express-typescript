@@ -4,6 +4,8 @@ import { CreateCourseDto } from '@dtos/courses.dto';
 import CourseService from '@services/courses.service';
 import UserService from '@/services/users.service';
 import { HttpException } from '@/exceptions/HttpException';
+import { Pagination } from '@/interfaces/shared.interface';
+import _ from 'lodash';
 
 class CoursesController {
   public courseService = new CourseService();
@@ -14,16 +16,15 @@ class CoursesController {
       let pagination = {},
         filter = {};
       if (req.query?.pagination) {
-        pagination = JSON.parse(req.query.pagination);
+        pagination = JSON.parse(req.query.pagination as string);
       }
 
       if (req.query?.filter) {
-        filter = JSON.parse(req.query.filter);
+        filter = JSON.parse(req.query.filter as string);
       }
 
-      const findAllCoursesData: Course[] = await this.courseService.findAllCourses(pagination, filter);
-
-      res.status(200).json({ data: findAllCoursesData, message: 'findAll' });
+      const data: [Course[], number] = await this.courseService.findAllCourses(pagination as Pagination<Course>, filter);
+      res.status(200).json({ data, message: 'findAll' });
     } catch (error) {
       next(error);
     }
@@ -31,22 +32,23 @@ class CoursesController {
 
   public getCourseById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findOneCourseData: Course = await this.courseService.findCourseById(req.params.id);
+      const course: Course = await this.courseService.findCourseBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(course)) throw new HttpException(404, 'Not Found');
 
-      res.status(200).json({ data: findOneCourseData, message: 'findOne' });
+      res.status(200).json({ data: course, message: 'findOne' });
     } catch (error) {
       next(error);
     }
   };
 
   public createCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const body = req.body as CreateCourseDto;
     try {
-      const courseData: CreateCourseDto = req.body;
-      const coordinator = await this.userService.findUserById(courseData.coordinatorId);
-      if (coordinator.role === 'ADMIN' || coordinator.role === 'USER') throw new HttpException(403, 'ENTOD');
+      const findCourse: Course = await this.courseService.findCourseBy({ key: 'name', value: body.name });
+      if (!_.isEmpty(findCourse)) throw new HttpException(409, 'Conflict');
 
-      const createCourseData: Course = await this.courseService.createCourse(courseData);
-      res.status(201).json({ data: createCourseData, message: 'created' });
+      const course: Course = await this.courseService.createCourse(body);
+      res.status(201).json({ data: course, message: 'created' });
     } catch (error) {
       console.log({ error });
       next(error);
@@ -54,13 +56,13 @@ class CoursesController {
   };
 
   public updateCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const body = req.body as CreateCourseDto;
     try {
-      const courseData: CreateCourseDto = req.body;
-      const coordinator = await this.userService.findUserById(courseData.coordinatorId);
-      if (coordinator.role === 'ADMIN' || coordinator.role === 'USER') throw new HttpException(403, 'ENTOD');
+      const findCourse: Course = await this.courseService.findCourseBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findCourse)) throw new HttpException(404, 'Not Found');
 
-      const updateCourseData: Course = await this.courseService.updateCourse(req.params.id, courseData);
-      res.status(200).json({ data: updateCourseData, message: 'updated' });
+      const course: Course = await this.courseService.updateCourse(findCourse.id, body);
+      res.status(200).json({ data: course, message: 'updated' });
     } catch (error) {
       next(error);
     }
@@ -68,9 +70,11 @@ class CoursesController {
 
   public deleteCourse = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const deleteCourseData: Course = await this.courseService.deleteCourse(req.params.id);
+      const findCourse: Course = await this.courseService.findCourseBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findCourse)) throw new HttpException(404, 'Not Found');
 
-      res.status(200).json({ data: deleteCourseData, message: 'deleted' });
+      await this.courseService.deleteCourse(findCourse.id);
+      res.status(200).end();
     } catch (error) {
       next(error);
     }
