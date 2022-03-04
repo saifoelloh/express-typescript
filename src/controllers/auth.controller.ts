@@ -1,18 +1,20 @@
 import { NextFunction, Request, Response } from 'express';
-import { User } from '@prisma/client';
-import { CreateUserDto, LoginUserDto } from '@dtos/users.dto';
+import { LoginUserDto } from '@dtos/users.dto';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import AuthService from '@services/auth.service';
+import UserService from '@/services/users.service';
+import { compare } from 'bcrypt';
+import { HttpException } from '@/exceptions/HttpException';
+import _ from 'lodash';
 
 class AuthController {
-  public authService = new AuthService();
+  private authService = new AuthService();
+  private userService = new UserService();
 
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: CreateUserDto = req.body;
-      const signUpUserData: User = await this.authService.signup(userData);
-
-      res.status(201).json({ data: signUpUserData, message: 'signup' });
+      const user = await this.userService.createUser(req.body);
+      res.status(201).json({ data: user, message: 'Success create new user' });
     } catch (error) {
       next(error);
     }
@@ -20,26 +22,24 @@ class AuthController {
 
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: LoginUserDto = req.body;
-      const { cookie, findUser } = await this.authService.login(userData);
+      const { email, password } = req.body as LoginUserDto;
+      const user = await this.userService.findUserBy({ key: 'email', value: email });
 
-      res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json({ data: findUser, message: 'login' });
+      const isPasswordMatching: boolean = await compare(password, user.password);
+      if (!isPasswordMatching) throw new HttpException(409, "You're password not matching");
+
+      const token = await this.authService.createToken(user);
+      const maxAge = Math.pow(60, 2) * 1000;
+      res.cookie('Authorization', token, { httpOnly: true, maxAge });
+      res.status(200).json({ data: user, message: 'login' });
     } catch (error) {
       next(error);
     }
   };
 
-  public logOut = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userData: User = req.user;
-      const logOutUserData: User = await this.authService.logout(userData);
-
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-      res.status(200).json({ data: logOutUserData, message: 'logout' });
-    } catch (error) {
-      next(error);
-    }
+  public logOut = (req: RequestWithUser, res: Response): void => {
+    res.clearCookie('Authorization');
+    res.status(200).end();
   };
 }
 

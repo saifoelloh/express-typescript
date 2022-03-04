@@ -2,21 +2,28 @@ import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
 import { CreateUserDto } from '@dtos/users.dto';
 import userService from '@services/users.service';
+import { Pagination } from '@/interfaces/shared.interface';
+import * as _ from 'lodash';
+import { hash } from 'bcrypt';
+import { HttpException } from '@/exceptions/HttpException';
 
 class UsersController {
   public userService = new userService();
 
   public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const filter = req.query?.filter || {};
-      let pagination = {};
-      if (req.query?.pagination) {
-        pagination = JSON.parse(req.query.pagination);
+      let pagination = {},
+        filter = {};
+      if (!_.isEmpty(req.query?.pagination)) {
+        pagination = JSON.parse(req.query.pagination as string);
       }
 
-      const findAllUsersData: User[] = await this.userService.findAllUser(pagination, filter);
+      if (!_.isEmpty(req.query?.filter)) {
+        filter = JSON.parse(req.query.filter as string);
+      }
 
-      res.status(200).json({ data: findAllUsersData, message: 'findAll' });
+      const data: [User[], number] = await this.userService.findAllUser(pagination as Pagination<User>, filter);
+      res.status(200).json({ data, message: 'findAll' });
     } catch (error) {
       next(error);
     }
@@ -24,9 +31,10 @@ class UsersController {
 
   public getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findOneUserData: User = await this.userService.findUserById(req.params.id);
+      const user: User = await this.userService.findUserBy({ key: 'id', value: req.params.id });
+      if (!_.isEmpty(user)) throw new HttpException(409, 'Conflict');
 
-      res.status(200).json({ data: findOneUserData, message: 'findOne' });
+      res.status(200).json({ data: user, message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -34,10 +42,13 @@ class UsersController {
 
   public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: CreateUserDto = req.body;
-      const createUserData: User = await this.userService.createUser(userData);
+      const { password, ...body } = req.body as CreateUserDto;
+      const findUser = await this.userService.findUserBy({ key: 'email', value: body.email });
+      if (!_.isEmpty(findUser)) throw new HttpException(409, 'Conflict');
 
-      res.status(201).json({ data: createUserData, message: 'created' });
+      const hashedPassword = await hash(password, 10);
+      const data: User = await this.userService.createUser({ ...body, password: hashedPassword });
+      res.status(201).json({ data, message: 'created' });
     } catch (error) {
       next(error);
     }
@@ -45,10 +56,13 @@ class UsersController {
 
   public updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: CreateUserDto = req.body;
-      const updateUserData: User = await this.userService.updateUser(req.params.id, userData);
+      const { password, ...body } = req.body as CreateUserDto;
+      const findUser = await this.userService.findUserBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findUser)) throw new HttpException(404, 'Not Found');
 
-      res.status(200).json({ data: updateUserData, message: 'updated' });
+      const hashedPassword = await hash(password, 10);
+      const data: User = await this.userService.updateUser(findUser.id, { ...findUser, ...body, password: hashedPassword });
+      res.status(200).json({ data, message: 'updated' });
     } catch (error) {
       next(error);
     }
@@ -56,9 +70,11 @@ class UsersController {
 
   public deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const deleteUserData: User = await this.userService.deleteUser(req.params.id);
+      const findUser = await this.userService.findUserBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findUser)) throw new HttpException(404, 'Not Found');
 
-      res.status(200).json({ data: deleteUserData, message: 'deleted' });
+      await this.userService.deleteUser(findUser.id);
+      res.status(200).end();
     } catch (error) {
       next(error);
     }

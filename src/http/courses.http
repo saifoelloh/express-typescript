@@ -1,0 +1,46 @@
+# baseURL
+@baseURL = http://localhost:3000
+
+###
+# Find All Courses
+GET {{ baseURL }}/courses
+
+###
+# Find Course By Id
+GET {{ baseURL }}/courses/123e4567-e89b-12d3-a456-426614174000
+
+###
+# Create Course
+POST {{ baseURL }}/courses
+Content-Type: application/json
+
+{
+  "name": "Typescript for Beginer",
+  "description": "Full tutorial of typescript.",
+	"price": 150000,
+  "coordinatorId": "123e4567-e89b-12d3-a456-426614174000",
+  "categories": [
+    { "id": "123e4567-e89b-12d3-a456-426614174000" },
+    { "id": "123e4567-e89b-12d3-a456-426614174000" }
+  ]
+}
+
+###
+# Modify Course By Id
+PUT {{ baseURL }}/courses/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+{
+  "name": "Typescript for Beginer",
+  "description": "Full tutorial of typescript.",
+	"price": 150000,
+  "coordinatorId": "123e4567-e89b-12d3-a456-426614174000",
+  "categories": [
+    { "id": "123e4567-e89b-12d3-a456-426614174000" },
+    { "id": "123e4567-e89b-12d3-a456-426614174000" }
+  ]
+}
+
+###
+# Delete Course By Id
+DELETE {{ baseURL }}/courses/123e4567-e89b-12d3-a456-426614174000
