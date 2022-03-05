@@ -133,3 +133,4 @@ dist
 
 # migration scrips
 src/prisma/migrations/
+storage/*
