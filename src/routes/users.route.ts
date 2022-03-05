@@ -3,6 +3,8 @@ import UsersController from '@controllers/users.controller';
 import { CreateUserDto } from '@dtos/users.dto';
 import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
+import authMw from '@/middlewares/auth.middleware';
+import { imageUploadMw } from '@/middlewares/media.middleware';
 
 class UsersRoute implements Routes {
   public path = '/users';
@@ -17,8 +19,9 @@ class UsersRoute implements Routes {
     this.router.get(`${this.path}`, this.usersController.getUsers);
     this.router.get(`${this.path}/:id`, this.usersController.getUserById);
     this.router.post(`${this.path}`, validationMiddleware(CreateUserDto, 'body'), this.usersController.createUser);
-    this.router.put(`${this.path}/:id`, validationMiddleware(CreateUserDto, 'body', true), this.usersController.updateUser);
-    this.router.delete(`${this.path}/:id`, this.usersController.deleteUser);
+    this.router.patch(`${this.path}/:id`, authMw(), validationMiddleware(CreateUserDto, 'body', true), this.usersController.updateUser);
+    this.router.patch(`${this.path}/:id/image`, authMw(), imageUploadMw, this.usersController.uploadPhoto);
+    this.router.delete(`${this.path}/:id`, authMw(), this.usersController.deleteUser);
   }
 }
 
