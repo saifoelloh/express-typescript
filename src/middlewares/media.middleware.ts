@@ -32,10 +32,11 @@ const storage = multer.diskStorage({
   },
 });
 
-export const imageUploadMw = multer({
-  storage,
-  limits: { fileSize: 1024 ** 2 },
-}).single('photo');
+export const imageUploadMw = (fieldName: string) =>
+  multer({
+    storage,
+    limits: { fileSize: 1024 ** 2 },
+  }).single(fieldName);
 
 export const deleteImageMw = (photo: ImageDto) => {
   const filePath = path.resolve(__dirname, `/../../storage/${photo.path}`);

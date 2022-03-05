@@ -56,21 +56,25 @@ class UsersController {
     }
   };
 
-  public updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public updateUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { password, ...body } = req.body as CreateUserDto;
       const findUser = await this.userService.findUserBy({ key: 'id', value: req.params.id });
       if (_.isEmpty(findUser)) throw new HttpException(404, 'Not Found');
 
       const hashedPassword = await hash(password, 10);
-      const data: User = await this.userService.updateUser(findUser.id, { ...findUser, ...body, password: hashedPassword });
+      const data: User = await this.userService.updateUser(findUser.id, {
+        ...findUser,
+        ...body,
+        password: hashedPassword,
+      });
       res.status(200).json({ data, message: 'updated' });
     } catch (error) {
       next(error);
     }
   };
 
-  public uploadPhoto = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public uploadImage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req['user'] as User;
       console.log({ file: req['fileData'] });
@@ -82,7 +86,7 @@ class UsersController {
     }
   };
 
-  public deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public deleteUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const findUser = await this.userService.findUserBy({ key: 'id', value: req.params.id });
       if (_.isEmpty(findUser)) throw new HttpException(404, 'Not Found');
