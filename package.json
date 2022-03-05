@@ -10,14 +10,13 @@
     "build": "tsc && tsc-alias",
     "build:swc": "swc src -d dist --source-maps --copy-files",
     "test": "jest --forceExit --detectOpenHandles",
-    "lint": "eslint --ignore-path .gitignore --ext .ts src/",
-    "lint:fix": "npm run lint -- --fix",
     "prisma:init": "prisma init",
     "prisma:migrate": "prisma migrate dev --preview-feature",
     "prisma:generate": "prisma generate",
     "deploy:prod": "npm run build && pm2 start ecosystem.config.js --only prod",
     "deploy:dev": "pm2 start ecosystem.config.js --only dev",
-    "generate:key": "node ./key-generator.js"
+    "generate:key": "node ./key-generator.js",
+    "tslint-check": "tslint-config-prettier-check ./tslint.json"
   },
   "prisma": {
     "schema": "src/prisma/schema.prisma"
@@ -41,6 +40,7 @@
     "multer": "^1.4.4",
     "swagger-jsdoc": "^6.0.0",
     "swagger-ui-express": "^4.1.6",
+    "tslint": "^6.1.3",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5"
   },
@@ -67,12 +67,7 @@
     "@types/swagger-jsdoc": "^6.0.1",
     "@types/swagger-ui-express": "^4.1.3",
     "@types/winston": "^2.4.4",
-    "@typescript-eslint/eslint-plugin": "^4.28.2",
-    "@typescript-eslint/parser": "^4.28.2",
     "cross-env": "^7.0.3",
-    "eslint": "^7.30.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
     "husky": "^7.0.4",
     "jest": "^27.0.6",
     "lint-staged": "^11.0.0",
@@ -88,6 +83,7 @@
     "ts-node": "^10.4.0",
     "tsc-alias": "^1.4.1",
     "tsconfig-paths": "^3.10.1",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.5.2"
   }
 }
