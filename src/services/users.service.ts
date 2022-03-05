@@ -1,9 +1,8 @@
+import * as _ from 'lodash';
 import { Prisma, PrismaClient, User } from '@prisma/client';
 import { CreateUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
-import { Pagination } from '@/interfaces/shared.interface';
-import { FindOneOption } from '@/interfaces/shared.dto';
-import * as _ from 'lodash';
+import { Pagination, FindOneOption } from '@/interfaces/shared.interface';
 
 class UserService {
   public users = new PrismaClient().user;
@@ -35,10 +34,10 @@ class UserService {
     return createUserData;
   }
 
-  public async updateUser(userId: string, userData: CreateUserDto): Promise<User> {
+  public async updateUser(userId: string, userData: User): Promise<User> {
     if (_.isEmpty(userData)) throw new HttpException(400, 'Bad Request');
 
-    const updateUserData = await this.users.update({ where: { id: userId }, data: userData });
+    const updateUserData = await this.users.update({ where: { id: userId }, data: { ...userData } });
     return updateUserData;
   }
 

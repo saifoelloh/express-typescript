@@ -11,7 +11,7 @@ dotenv.config();
 const authService = new AuthService();
 const userService = new UserService();
 
-const authMiddleware =
+const authMw =
   (roles: UserRole[] = [UserRole.ADMIN, UserRole.COORDINATOR, UserRole.USER]) =>
   async (req: RequestWithUser, res: Response, next: NextFunction) => {
     const token = req.cookies['Authorization'];
@@ -33,4 +33,4 @@ const authMiddleware =
     }
   };
 
-export default authMiddleware;
+export default authMw;
