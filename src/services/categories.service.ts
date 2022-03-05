@@ -7,12 +7,15 @@ import * as _ from 'lodash';
 class CategoryService {
   public categories = new PrismaClient().category;
 
-  public async findAllCategory(pagination: Pagination<Category>, filter: Prisma.CategoryWhereInput = {}): Promise<[Category[], number]> {
+  public async findAllCategory(
+    pagination: Pagination<Category>,
+    filter: Prisma.CategoryWhereInput = {},
+  ): Promise<[Category[], number]> {
     const { show = 10, page = 0, orderBy = [{ name: 'desc' }] } = pagination;
     const categories: Category[] = await this.categories.findMany({
       skip: show * page,
       take: show,
-      orderBy: orderBy,
+      orderBy,
       where: filter,
     });
     const total = await this.categories.count({ where: filter });

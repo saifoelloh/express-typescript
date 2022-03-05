@@ -20,22 +20,21 @@ const storage = multer.diskStorage({
       fs.mkdirSync(fullPath, { recursive: true });
     }
 
-    console.log({ filePath, storagePath });
-
-    req['fileData'] = {
+    req.fileData = {
       extension: fileExt,
       name: fileName,
       path: `${filePath}/${fileName}`,
     } as ImageDto;
 
-    cb(null, req['fileData'].path);
+    cb(null, req.fileData.path);
   },
 });
 
-export const imageUploadMw = multer({
-  storage,
-  limits: { fileSize: 1024 ** 2 },
-}).single('photo');
+export const imageUploadMw = (fieldName: string) =>
+  multer({
+    storage,
+    limits: { fileSize: 1024 ** 2 },
+  }).single(fieldName);
 
 export const deleteImageMw = (photo: ImageDto) => {
   const filePath = path.resolve(__dirname, `/../../storage/${photo.path}`);

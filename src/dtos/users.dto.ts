@@ -15,11 +15,3 @@ export class CreateUserDto {
   @IsOptional()
   public role?: UserRole;
 }
-
-export class LoginUserDto {
-  @IsEmail()
-  public email: string;
-
-  @IsString()
-  public password: string;
-}

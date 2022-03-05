@@ -14,7 +14,7 @@ const userService = new UserService();
 const authMw =
   (roles: UserRole[] = [UserRole.ADMIN, UserRole.COORDINATOR, UserRole.USER]) =>
   async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    const token = req.cookies['Authorization'];
+    const token = req.cookies.Authorization;
     if (_.isEmpty(token)) next(new HttpException(401, 'Unauthorized'));
 
     try {
@@ -28,7 +28,6 @@ const authMw =
       req.user = user;
       next();
     } catch (error) {
-      console.log(error);
       next(new HttpException(401, 'Unauthorized'));
     }
   };

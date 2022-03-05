@@ -1,9 +1,8 @@
-import { IsArray, IsNumber, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsArray, IsNumber, IsString, IsUUID } from 'class-validator';
 
-class CategoryIdDto {
-  @IsUUID('4')
-  public id: string;
-}
+type CategoryIdDto = {
+  id: string;
+};
 
 export class CreateCourseDto {
   @IsString()

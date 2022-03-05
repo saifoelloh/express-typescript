@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { CreateUserDto, LoginUserDto } from '@dtos/users.dto';
+import { CreateUserDto } from '@dtos/users.dto';
+import { LoginUserDto } from '@/dtos/login.dto';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import AuthService from '@services/auth.service';
 import UserService from '@/services/users.service';

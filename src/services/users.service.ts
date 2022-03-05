@@ -7,12 +7,15 @@ import { Pagination, FindOneOption } from '@/interfaces/shared.interface';
 class UserService {
   public users = new PrismaClient().user;
 
-  public async findAllUser(pagination: Pagination<User>, filter: Prisma.CategoryWhereInput = {}): Promise<[User[], number]> {
+  public async findAllUser(
+    pagination: Pagination<User>,
+    filter: Prisma.CategoryWhereInput = {},
+  ): Promise<[User[], number]> {
     const { show = 10, page = 0, orderBy = [{ createdAt: 'desc' }] } = pagination;
     const users: User[] = await this.users.findMany({
       skip: show * page,
       take: show,
-      orderBy: orderBy,
+      orderBy,
       where: filter,
     });
     const total = await this.users.count({ where: filter });
