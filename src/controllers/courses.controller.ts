@@ -13,17 +13,20 @@ class CoursesController {
 
   public getCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      let pagination = {},
-        filter = {};
+      let pagination = {};
       if (req.query?.pagination) {
         pagination = JSON.parse(req.query.pagination as string);
       }
 
+      let filter = {};
       if (req.query?.filter) {
         filter = JSON.parse(req.query.filter as string);
       }
 
-      const data: [Course[], number] = await this.courseService.findAllCourses(pagination as Pagination<Course>, filter);
+      const data: [Course[], number] = await this.courseService.findAllCourses(
+        pagination as Pagination<Course>,
+        filter,
+      );
       res.status(200).json({ data, message: 'findAll' });
     } catch (error) {
       next(error);
@@ -50,7 +53,6 @@ class CoursesController {
       const course: Course = await this.courseService.createCourse(body);
       res.status(201).json({ data: course, message: 'created' });
     } catch (error) {
-      console.log({ error });
       next(error);
     }
   };

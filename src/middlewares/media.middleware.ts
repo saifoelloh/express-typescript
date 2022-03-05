@@ -20,15 +20,13 @@ const storage = multer.diskStorage({
       fs.mkdirSync(fullPath, { recursive: true });
     }
 
-    console.log({ filePath, storagePath });
-
-    req['fileData'] = {
+    req.fileData = {
       extension: fileExt,
       name: fileName,
       path: `${filePath}/${fileName}`,
     } as ImageDto;
 
-    cb(null, req['fileData'].path);
+    cb(null, req.fileData.path);
   },
 });
 

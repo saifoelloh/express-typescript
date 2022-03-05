@@ -7,12 +7,15 @@ import * as _ from 'lodash';
 class CourseService {
   public courses = new PrismaClient().course;
 
-  public async findAllCourses(pagination: Pagination<Course>, filter: Prisma.CategoryWhereInput = {}): Promise<[Course[], number]> {
+  public async findAllCourses(
+    pagination: Pagination<Course>,
+    filter: Prisma.CategoryWhereInput = {},
+  ): Promise<[Course[], number]> {
     const { show = 10, page = 0, orderBy = [{ createdAt: 'desc' }] } = pagination;
     const courses: Course[] = await this.courses.findMany({
       skip: show * page,
       take: show,
-      orderBy: orderBy,
+      orderBy,
       where: filter,
       include: { coordinator: true, categories: true },
     });
@@ -43,7 +46,10 @@ class CourseService {
     if (_.isEmpty(courseData)) throw new HttpException(400, "You're not courseData");
 
     const { categories = [], ...data } = courseData;
-    const updateCourseData = await this.courses.update({ where: { id: courseId }, data: { ...data, categories: { connect: categories } } });
+    const updateCourseData = await this.courses.update({
+      where: { id: courseId },
+      data: { ...data, categories: { connect: categories } },
+    });
     return updateCourseData;
   }
 

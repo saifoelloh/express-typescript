@@ -14,12 +14,12 @@ class UsersController {
 
   public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      let pagination = {},
-        filter = {};
+      let pagination = {};
       if (!_.isEmpty(req.query?.pagination)) {
         pagination = JSON.parse(req.query.pagination as string);
       }
 
+      let filter = {};
       if (!_.isEmpty(req.query?.filter)) {
         filter = JSON.parse(req.query.filter as string);
       }
@@ -75,10 +75,9 @@ class UsersController {
   };
 
   public uploadImage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const user = req.user as User;
     try {
-      const user = req['user'] as User;
-      console.log({ file: req['fileData'] });
-      const image = await this.imageService.createImage(req['fileData']);
+      const image = await this.imageService.createImage(req.fileData);
       const data = await this.userService.updateUser(user.id, { ...user, imageId: image.id });
       res.status(200).json({ data, message: 'updated' });
     } catch (error) {

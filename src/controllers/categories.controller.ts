@@ -11,12 +11,12 @@ class CategoriesController {
 
   public getCategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      let pagination = {},
-        filter = {};
+      let pagination = {};
       if (req.query?.pagination) {
         pagination = JSON.parse(req.query.pagination as string);
       }
 
+      let filter = {};
       if (req.query?.filter) {
         filter = JSON.parse(req.query.filter as string);
       }
