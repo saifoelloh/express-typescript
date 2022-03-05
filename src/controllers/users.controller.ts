@@ -6,9 +6,11 @@ import { Pagination } from '@/interfaces/shared.interface';
 import * as _ from 'lodash';
 import { hash } from 'bcrypt';
 import { HttpException } from '@/exceptions/HttpException';
+import { ImageService } from '@/services/image.service';
 
 class UsersController {
-  public userService = new userService();
+  readonly userService = new userService();
+  readonly imageService = new ImageService();
 
   public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -62,6 +64,18 @@ class UsersController {
 
       const hashedPassword = await hash(password, 10);
       const data: User = await this.userService.updateUser(findUser.id, { ...findUser, ...body, password: hashedPassword });
+      res.status(200).json({ data, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public uploadPhoto = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req['user'] as User;
+      console.log({ file: req['fileData'] });
+      const image = await this.imageService.createImage(req['fileData']);
+      const data = await this.userService.updateUser(user.id, { ...user, imageId: image.id });
       res.status(200).json({ data, message: 'updated' });
     } catch (error) {
       next(error);
