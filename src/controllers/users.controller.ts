@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
 import { CreateUserDto } from '@dtos/users.dto';
-import userService from '@services/users.service';
+import UserService from '@services/users.service';
 import { Pagination } from '@/interfaces/shared.interface';
 import * as _ from 'lodash';
 import { hash } from 'bcrypt';
@@ -9,7 +9,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import { ImageService } from '@/services/image.service';
 
 class UsersController {
-  readonly userService = new userService();
+  readonly userService = new UserService();
   readonly imageService = new ImageService();
 
   public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -74,7 +74,7 @@ class UsersController {
     }
   };
 
-  public uploadImage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public uploadImage = async (req: any, res: Response, next: NextFunction): Promise<void> => {
     const user = req.user as User;
     try {
       const image = await this.imageService.createImage(req.fileData);
