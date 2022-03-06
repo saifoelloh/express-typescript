@@ -30,7 +30,11 @@ class CategoriesRoute implements Routes {
       validationMiddleware(CreateCategoryDto, 'body', true),
       this.categoriesController.updateCategory,
     );
-    this.router.delete(`${this.path}/:id`, authMw([UserRole.ADMIN, UserRole.COORDINATOR]), this.categoriesController.deleteCategory);
+    this.router.delete(
+      `${this.path}/:id`,
+      authMw([UserRole.ADMIN, UserRole.COORDINATOR]),
+      this.categoriesController.deleteCategory,
+    );
   }
 }
 

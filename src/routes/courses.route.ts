@@ -17,8 +17,18 @@ class CoursesRoute implements Routes {
   private initializeRoutes() {
     this.router.get(`${this.path}`, this.usersController.getCourses);
     this.router.get(`${this.path}/:id`, this.usersController.getCourseById);
-    this.router.post(`${this.path}`, authMw(), validationMiddleware(CreateCourseDto, 'body'), this.usersController.createCourse);
-    this.router.put(`${this.path}/:id`, authMw(), validationMiddleware(CreateCourseDto, 'body', true), this.usersController.updateCourse);
+    this.router.post(
+      `${this.path}`,
+      authMw(),
+      validationMiddleware(CreateCourseDto, 'body'),
+      this.usersController.createCourse,
+    );
+    this.router.put(
+      `${this.path}/:id`,
+      authMw(),
+      validationMiddleware(CreateCourseDto, 'body', true),
+      this.usersController.updateCourse,
+    );
     this.router.delete(`${this.path}/:id`, authMw(), this.usersController.deleteCourse);
   }
 }
