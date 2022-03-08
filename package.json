@@ -15,7 +15,7 @@
     "prisma:generate": "prisma generate",
     "deploy:prod": "npm run build && pm2 start ecosystem.config.js --only prod",
     "deploy:dev": "pm2 start ecosystem.config.js --only dev",
-    "generate:key": "node ./key-generator.js",
+    "init": "sh ./commands.sh",
     "tslint-check": "tslint-config-prettier-check ./tslint.json"
   },
   "prisma": {
