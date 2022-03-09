@@ -40,7 +40,11 @@ class UserService {
   public async updateUser(userId: string, userData: User): Promise<User> {
     if (_.isEmpty(userData)) throw new HttpException(400, 'Bad Request');
 
-    const updateUserData = await this.users.update({ where: { id: userId }, data: { ...userData } });
+    const updateUserData = await this.users.update({
+      where: { id: userId },
+      data: { ...userData },
+      include: { image: true, courses: true },
+    });
     return updateUserData;
   }
 

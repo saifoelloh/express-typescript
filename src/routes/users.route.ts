@@ -22,10 +22,10 @@ class UsersRoute implements Routes {
     this.router.patch(
       `${this.path}/:id`,
       authMw(),
+      imageUploadMw('photo'),
       validationMiddleware(CreateUserDto, 'body', true),
       this.usersController.updateUserById,
     );
-    this.router.patch(`${this.path}/:id/image`, authMw(), imageUploadMw('photo'), this.usersController.uploadImage);
     this.router.delete(`${this.path}/:id`, authMw(), this.usersController.deleteUserById);
   }
 }

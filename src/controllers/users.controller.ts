@@ -56,18 +56,23 @@ class UsersController {
     }
   };
 
-  public updateUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public updateUserById = async (req, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { password, ...body } = req.body as CreateUserDto;
-      const findUser = await this.userService.findUserBy({ key: 'id', value: req.params.id });
-      if (_.isEmpty(findUser)) throw new HttpException(404, 'Not Found');
+      const body: CreateUserDto = req.body;
+      const findUser = req.user;
 
-      const hashedPassword = await hash(password, 10);
+      let photo = {};
+      if (!_.isEmpty(req.file)) {
+        const image = await this.imageService.createImage(req.fileData);
+        photo = { imageId: image.id };
+      }
+
       const data: User = await this.userService.updateUser(findUser.id, {
         ...findUser,
         ...body,
-        password: hashedPassword,
+        ...photo,
       });
+
       res.status(200).json({ data, message: 'updated' });
     } catch (error) {
       next(error);
