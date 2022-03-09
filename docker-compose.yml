@@ -1,32 +1,25 @@
 version: '3.7'
 
 services:
-  proxy:
-    image: nginx:alpine
-    container_name: proxy
-    ports:
-      - '80:80'
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    restart: 'unless-stopped'
   server:
     build:
-      context: ./
-      target: development-build-stage
-      dockerfile: Dockerfile
+      context: .
     container_name: server
+    networks:
+      - $APP_NETWORK
+    working_dir: /app
     ports:
-      - '3000:3000'
+      - '${APP_PORT}:${APP_PORT}'
     volumes:
-      - ./:/app
-      - /app/node_modules
+      - .:/app
+    command: 'yarn dev'
+    depends_on:
+      - postgres
+    external_links:
+      - postgres:postgres
+      - adminer:adminer
     restart: 'unless-stopped'
 
 networks:
-  default:
-    external:
-      name: ${APP_NETWORK}
-
-volumes:
-  data:
-    driver: local
+  main:
+    external: true
