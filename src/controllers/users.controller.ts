@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import { hash } from 'bcrypt';
 import { HttpException } from '@/exceptions/HttpException';
 import { ImageService } from '@/services/image.service';
+import { deleteImageMw } from '@/middlewares/media.middleware';
 
 class UsersController {
   readonly userService = new UserService();
@@ -63,17 +64,19 @@ class UsersController {
 
       let photo = {};
       if (!_.isEmpty(req.file)) {
+        if (!_.isEmpty(findUser.image)) {
+          await deleteImageMw(findUser.image.path);
+        }
+
         const image = await this.imageService.createImage(req.fileData);
         photo = { imageId: image.id };
       }
 
-      const data: User = await this.userService.updateUser(findUser.id, {
-        ...findUser,
-        ...body,
-        ...photo,
-      });
+      const { image: _image, courses, ...user } = findUser;
+      const payload = { ...user, ...body, ...photo };
+      const updatedUser = await this.userService.updateUser(findUser.id, payload);
 
-      res.status(200).json({ data, message: 'updated' });
+      res.status(200).json({ data: updatedUser, message: 'updated' });
     } catch (error) {
       next(error);
     }

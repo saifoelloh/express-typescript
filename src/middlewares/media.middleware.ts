@@ -36,9 +36,12 @@ export const imageUploadMw = (fieldName: string) =>
     limits: { fileSize: 1024 ** 2 },
   }).single(fieldName);
 
-export const deleteImageMw = (photo: ImageDto) => {
-  const filePath = path.resolve(__dirname, `/../../storage/${photo.path}`);
-  if (fs.existsSync(filePath)) {
+export const deleteImageMw = async (location: string) => {
+  try {
+    const filePath = __dirname + `/../../storage/${location}`;
+    await fs.promises.access(filePath, fs.constants.R_OK | fs.constants.W_OK);
     fs.unlinkSync(filePath);
+  } catch (error) {
+    console.log(error);
   }
 };

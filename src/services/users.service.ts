@@ -26,7 +26,10 @@ class UserService {
     if (_.isEmpty(option)) throw new HttpException(400, 'Bad Request');
 
     const { key, value } = option;
-    const findUser: User = await this.users.findUnique({ where: { [key]: value } });
+    const findUser: User = await this.users.findUnique({
+      where: { [key]: value },
+      include: { courses: true, image: true },
+    });
     return findUser;
   }
 
