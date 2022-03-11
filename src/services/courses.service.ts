@@ -1,8 +1,9 @@
-import { Prisma, PrismaClient, Course } from '@prisma/client';
+import { Prisma, PrismaClient, Course, Image } from '@prisma/client';
 import { CreateCourseDto } from '@dtos/courses.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { FindOneOption, Pagination } from '@/interfaces/shared.interface';
 import * as _ from 'lodash';
+import { ImageDto, ImageIdDto } from '@/dtos/image.dto';
 
 class CourseService {
   public courses = new PrismaClient().course;
@@ -27,7 +28,10 @@ class CourseService {
     if (_.isEmpty(option)) throw new HttpException(400, 'Bad Request');
 
     const { key, value } = option;
-    const course = await this.courses.findFirst({ where: { [key]: value } });
+    const course = await this.courses.findFirst({
+      where: { [key]: value },
+      include: { categories: true, coordinator: true, images: true },
+    });
     return course;
   }
 
@@ -58,6 +62,47 @@ class CourseService {
 
     const deleteCourseData = await this.courses.delete({ where: { id: courseId } });
     return deleteCourseData;
+  }
+
+  public async uploadImage(courseId: string, image: ImageIdDto): Promise<Course> {
+    if (_.isEmpty(image)) throw new HttpException(400, "You're not courseData");
+    const updatedCourse = await this.courses.update({
+      where: { id: courseId },
+      data: {
+        images: { connect: image },
+      },
+    });
+
+    return updatedCourse;
+  }
+
+  public async updateImage(courseId: string, image: Image): Promise<Course> {
+    if (_.isEmpty(image)) throw new HttpException(400, "You're not courseData");
+    const updatedCourse = await this.courses.update({
+      where: { id: courseId },
+      data: {
+        images: {
+          update: {
+            where: { id: image.id },
+            data: image,
+          },
+        },
+      },
+    });
+
+    return updatedCourse;
+  }
+
+  public async deleteImage(courseId: string, image: ImageIdDto): Promise<Course> {
+    if (_.isEmpty(image)) throw new HttpException(400, "You're not courseData");
+    const updatedCourse = await this.courses.update({
+      where: { id: courseId },
+      data: {
+        images: { delete: image },
+      },
+    });
+
+    return updatedCourse;
   }
 }
 

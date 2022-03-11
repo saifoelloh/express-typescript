@@ -10,3 +10,7 @@ export class ImageDto {
   @IsString()
   path: string;
 }
+
+export interface ImageIdDto {
+  id: string;
+}

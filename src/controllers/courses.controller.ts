@@ -1,15 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
-import { Course } from '@prisma/client';
+import { Course, Image } from '@prisma/client';
 import { CreateCourseDto } from '@dtos/courses.dto';
 import CourseService from '@services/courses.service';
-import UserService from '@/services/users.service';
 import { HttpException } from '@/exceptions/HttpException';
 import { Pagination } from '@/interfaces/shared.interface';
-import _ from 'lodash';
+import _, { find } from 'lodash';
+import ImageService from '@/services/image.service';
+import { ImageDto } from '@/dtos/image.dto';
+import { deleteImageMw } from '@/middlewares/media.middleware';
 
 class CoursesController {
-  public courseService = new CourseService();
-  public userService = new UserService();
+  private readonly courseService = new CourseService();
+  private readonly imageService = new ImageService();
 
   public getCourses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -77,6 +79,51 @@ class CoursesController {
 
       await this.courseService.deleteCourse(findCourse.id);
       res.status(200).end();
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public addPhoto = async (req, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const findCourse: Course = await this.courseService.findCourseBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findCourse)) throw new HttpException(404, 'Not Found');
+
+      const image = await this.imageService.createImage(req.fileData);
+      const updatedCourse = await this.courseService.uploadImage(findCourse.id, { id: image.id });
+      res.status(200).json({ data: updatedCourse, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updatePhoto = async (req, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const findCourse: Course = await this.courseService.findCourseBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findCourse)) throw new HttpException(404, 'Not Found');
+
+      const findImage = await this.imageService.findImageBy({ key: 'id', value: req.params.imageId });
+      if (_.isEmpty(findImage)) throw new HttpException(404, 'Not Found');
+
+      const updatedCourse = await this.courseService.updateImage(findCourse.id, { ...findImage, ...req.fileData });
+      await deleteImageMw(findImage.path);
+      res.status(200).json({ data: updatedCourse, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deletePhoto = async (req, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const findCourse: Course = await this.courseService.findCourseBy({ key: 'id', value: req.params.id });
+      if (_.isEmpty(findCourse)) throw new HttpException(404, 'Not Found');
+
+      const findImage = await this.imageService.findImageBy({ key: 'id', value: req.params.imageId });
+      if (_.isEmpty(findImage)) throw new HttpException(404, 'Not Found');
+
+      const updatedCourse = await this.courseService.deleteImage(findCourse.id, { id: findImage.id });
+      await deleteImageMw(findImage.path);
+      res.status(200).json({ data: updatedCourse, message: 'success' });
     } catch (error) {
       next(error);
     }
