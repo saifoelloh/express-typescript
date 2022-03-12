@@ -5,21 +5,25 @@ import { FindOneOption, Pagination } from '@/interfaces/shared.interface';
 import * as _ from 'lodash';
 
 class CategoryService {
-  public categories = new PrismaClient().category;
+  readonly prisma = new PrismaClient();
+  readonly categories = this.prisma.category;
 
   public async findAllCategory(
     pagination: Pagination<Category>,
     filter: Prisma.CategoryWhereInput = {},
   ): Promise<[Category[], number]> {
     const { show = 10, page = 0, orderBy = [{ name: 'desc' }] } = pagination;
-    const categories: Category[] = await this.categories.findMany({
-      skip: show * page,
-      take: show,
-      orderBy,
-      where: filter,
-    });
-    const total = await this.categories.count({ where: filter });
-    return [categories, total];
+    const payload: [Category[], number] = await this.prisma.$transaction([
+      this.categories.findMany({
+        skip: show * page,
+        take: show,
+        orderBy,
+        where: filter,
+      }),
+      this.categories.count({ where: filter }),
+    ]);
+
+    return payload;
   }
 
   public async findCategoryBy(option: FindOneOption<Category>): Promise<Category> {

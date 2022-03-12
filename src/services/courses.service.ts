@@ -6,22 +6,26 @@ import * as _ from 'lodash';
 import { ImageDto, ImageIdDto } from '@/dtos/image.dto';
 
 class CourseService {
-  public courses = new PrismaClient().course;
+  readonly prisma = new PrismaClient();
+  readonly courses = this.prisma.course;
 
   public async findAllCourses(
     pagination: Pagination<Course>,
     filter: Prisma.CategoryWhereInput = {},
   ): Promise<[Course[], number]> {
     const { show = 10, page = 0, orderBy = [{ createdAt: 'desc' }] } = pagination;
-    const courses: Course[] = await this.courses.findMany({
-      skip: show * page,
-      take: show,
-      orderBy,
-      where: filter,
-      include: { coordinator: true, categories: true },
-    });
-    const total = await this.courses.count({ where: filter });
-    return [courses, total];
+    const payload: [Course[], number] = await this.prisma.$transaction([
+      this.courses.findMany({
+        skip: show * page,
+        take: show,
+        orderBy,
+        where: filter,
+        include: { coordinator: true, categories: true, chapters: true },
+      }),
+      this.courses.count({ where: filter }),
+    ]);
+
+    return payload;
   }
 
   public async findCourseBy(option: FindOneOption<Course>): Promise<Course> {
@@ -30,7 +34,7 @@ class CourseService {
     const { key, value } = option;
     const course = await this.courses.findFirst({
       where: { [key]: value },
-      include: { categories: true, coordinator: true, images: true },
+      include: { categories: true, coordinator: true, images: true, chapters: true },
     });
     return course;
   }

@@ -5,21 +5,24 @@ import { HttpException } from '@exceptions/HttpException';
 import { Pagination, FindOneOption } from '@/interfaces/shared.interface';
 
 class UserService {
-  public users = new PrismaClient().user;
+  readonly prisma = new PrismaClient();
+  readonly users = this.prisma.user;
 
   public async findAllUser(
     pagination: Pagination<User>,
     filter: Prisma.CategoryWhereInput = {},
   ): Promise<[User[], number]> {
     const { show = 10, page = 0, orderBy = [{ createdAt: 'desc' }] } = pagination;
-    const users: User[] = await this.users.findMany({
-      skip: show * page,
-      take: show,
-      orderBy,
-      where: filter,
-    });
-    const total = await this.users.count({ where: filter });
-    return [users, total];
+    const payload: [User[], number] = await this.prisma.$transaction([
+      this.users.findMany({
+        skip: show * page,
+        take: show,
+        orderBy,
+        where: filter,
+      }),
+      this.users.count({ where: filter }),
+    ]);
+    return payload;
   }
 
   public async findUserBy(option: FindOneOption<User>): Promise<User> {
