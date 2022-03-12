@@ -16,19 +16,25 @@ enum UserRole {
   COORDINATOR
 }
 
+enum QuizType {
+  BINARY_OPTION
+  MULTIPLE_CHOICE
+  ESSAY
+}
+
 model User {
-  id       String  @id @default(uuid())
-  name     String
-  email    String  @unique
-  password String
-  image    Image?  @relation(fields: [imageId], references: [id])
-  imageId  String?
-
-  role    UserRole @default(USER)
-  courses Course[]
-
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(USER)
+  imageId   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  courses Course[]
+  image   Image?   @relation(fields: [imageId], references: [id])
+  @@index([id, imageId])
 }
 
 model Category {
@@ -40,16 +46,18 @@ model Category {
 }
 
 model Course {
-  id            String     @id @default(uuid())
+  id            String   @id @default(uuid())
   name          String
   description   String
-  price         Float      @default(0)
-  coordinator   User       @relation(fields: [coordinatorId], references: [id])
+  price         Float    @default(0)
+  coordinator   User     @relation(fields: [coordinatorId], references: [id])
   coordinatorId String
-  images        Image[]
-  categories    Category[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  images     Image[]
+  categories Category[]
+  chapters   Chapter[]
 
   @@index([id, coordinatorId])
 }
@@ -61,6 +69,45 @@ model Image {
   path      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  User      User[]
-  Courses   Course[]
+
+  user    User[]
+  courses Course[]
+}
+
+model Chapter {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  course      Course   @relation(fields: [courseId], references: [id])
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quizzes Quiz[]
+  @@index([id, courseId])
+}
+
+model Quiz {
+  id        String   @id @default(uuid())
+  question  String
+  quizType  QuizType @default(BINARY_OPTION)
+  chapterId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  answers QuizAnswer[]
+  chapter Chapter      @relation(fields: [chapterId], references: [id])
+  @@index([id, chapterId])
+}
+
+model QuizAnswer {
+  id        String   @id @default(uuid())
+  answer    String   @default("")
+  isCorrect Boolean  @default(false)
+  quizId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quiz Quiz @relation(fields: [quizId], references: [id])
+  @@index([id, quizId])
 }
