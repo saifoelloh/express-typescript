@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
 import { NextFunction, Request, Response } from 'express';
-import { CourseChapter } from '@prisma/client';
+import { Chapter } from '@prisma/client';
 
-import { CreateCourseDto } from '@dtos/courses.dto';
 import { HttpException } from '@/exceptions/HttpException';
 import { Pagination } from '@/interfaces/shared.interface';
 import ChapterService from '@/services/chapters.service';
@@ -23,11 +22,11 @@ class ChapterController {
         filter = JSON.parse(req.query.filter as string);
       }
 
-      const courseChapters: CourseChapter[] = await this.chapterService.findAllCourseChapters(
-        pagination as Pagination<CourseChapter>,
+      const chapters: [Chapter[], number] = await this.chapterService.findAllChapter(
+        pagination as Pagination<Chapter>,
         filter,
       );
-      res.status(200).json({ data: courseChapters, message: 'findAll' });
+      res.status(200).json({ data: chapters, message: 'findAll' });
     } catch (error) {
       next(error);
     }
@@ -35,7 +34,7 @@ class ChapterController {
 
   public getChapterById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const course: CourseChapter = await this.chapterService.findCourseChapterBy({
+      const course: Chapter = await this.chapterService.findChapterBy({
         key: 'id',
         value: req.params.id,
       });
@@ -50,13 +49,13 @@ class ChapterController {
   public createChapter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const body = req.body as CreateChapterDto;
     try {
-      const findCourse: CourseChapter = await this.chapterService.findCourseChapterBy({
+      const findCourse: Chapter = await this.chapterService.findChapterBy({
         key: 'title',
         value: body.title,
       });
       if (!_.isEmpty(findCourse)) throw new HttpException(409, 'Conflict');
 
-      const course: CourseChapter = await this.chapterService.createCourseChapter(body);
+      const course: Chapter = await this.chapterService.createChapter(body);
       res.status(201).json({ data: course, message: 'created' });
     } catch (error) {
       next(error);
@@ -66,13 +65,13 @@ class ChapterController {
   public updateChapter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const body = req.body as CreateChapterDto;
     try {
-      const findCourse: CourseChapter = await this.chapterService.findCourseChapterBy({
+      const findCourse: Chapter = await this.chapterService.findChapterBy({
         key: 'id',
         value: req.params.id,
       });
       if (_.isEmpty(findCourse)) throw new HttpException(404, 'Not Found');
 
-      const course: CourseChapter = await this.chapterService.updateCourse(findCourse.id, body);
+      const course: Chapter = await this.chapterService.updateChapter(findCourse.id, body);
       res.status(200).json({ data: course, message: 'updated' });
     } catch (error) {
       next(error);
@@ -81,13 +80,13 @@ class ChapterController {
 
   public deleteChapter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findCourse: CourseChapter = await this.chapterService.findCourseChapterBy({
+      const findCourse: Chapter = await this.chapterService.findChapterBy({
         key: 'id',
         value: req.params.id,
       });
       if (_.isEmpty(findCourse)) throw new HttpException(404, 'Not Found');
 
-      await this.chapterService.deleteCourse(findCourse.id);
+      await this.chapterService.deleteChapter(findCourse.id);
       res.status(200).end();
     } catch (error) {
       next(error);
