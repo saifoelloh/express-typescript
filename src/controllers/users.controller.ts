@@ -35,7 +35,7 @@ class UsersController {
   public getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user: User = await this.userService.findUserBy({ key: 'id', value: req.params.id });
-      if (!_.isEmpty(user)) throw new HttpException(409, 'Conflict');
+      if (_.isEmpty(user)) throw new HttpException(404, 'Not Found');
 
       res.status(200).json({ data: user, message: 'findOne' });
     } catch (error) {

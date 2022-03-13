@@ -24,7 +24,7 @@ class CategoriesRoute implements Routes {
       validationMiddleware(CreateCategoryDto, 'body'),
       this.categoriesController.createCategory,
     );
-    this.router.put(
+    this.router.patch(
       `${this.path}/:id`,
       authMw([UserRole.ADMIN, UserRole.COORDINATOR]),
       validationMiddleware(CreateCategoryDto, 'body', true),
