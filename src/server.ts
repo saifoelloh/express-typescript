@@ -6,6 +6,7 @@ import validateEnv from '@utils/validateEnv';
 import CategoriesRoute from './routes/categories.route';
 import ChaptersRoute from './routes/chapters.route';
 import CoursesRoute from './routes/courses.route';
+import QuizzesRoute from './routes/quizzes.route';
 
 validateEnv();
 
@@ -16,6 +17,7 @@ const app = new App([
   new CategoriesRoute(),
   new CoursesRoute(),
   new ChaptersRoute(),
+  new QuizzesRoute(),
 ]);
 
 app.listen();
