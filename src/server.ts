@@ -5,6 +5,7 @@ import UsersRoute from '@routes/users.route';
 import validateEnv from '@utils/validateEnv';
 import CategoriesRoute from './routes/categories.route';
 import ChaptersRoute from './routes/chapters.route';
+import ChoicesRoute from './routes/choice.route';
 import CoursesRoute from './routes/courses.route';
 import QuizzesRoute from './routes/quizzes.route';
 
@@ -18,6 +19,7 @@ const app = new App([
   new CoursesRoute(),
   new ChaptersRoute(),
   new QuizzesRoute(),
+  new ChoicesRoute(),
 ]);
 
 app.listen();

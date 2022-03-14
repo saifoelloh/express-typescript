@@ -5,7 +5,6 @@ import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import authMw from '@/middlewares/auth.middleware';
 import { imageUploadMw } from '@/middlewares/media.middleware';
-import { ImageDto } from '@/dtos/image.dto';
 
 class CoursesRoute implements Routes {
   public path = '/courses';
