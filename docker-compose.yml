@@ -1,24 +1,25 @@
 version: '3.7'
 
 services:
-  server:
+  api:
     build:
       context: .
-    container_name: server
+      dockerfile: Dockerfile
+    image: myapp/api
+    container_name: $APP_NAME
     networks:
       - $APP_NETWORK
-    working_dir: /app
     ports:
-      - '${APP_PORT}:${APP_PORT}'
+      - ${APP_PORT}:${APP_PORT}
     volumes:
+      - /app/node_modules
       - .:/app
-    command: 'yarn dev'
+    command: ['yarn', 'dev']
     depends_on:
       - postgres
     external_links:
       - postgres:postgres
       - adminer:adminer
-    restart: 'unless-stopped'
 
 networks:
   main:
