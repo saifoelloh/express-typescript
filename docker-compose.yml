@@ -15,8 +15,6 @@ services:
       - /app/node_modules
       - .:/app
     command: ['yarn', 'dev']
-    depends_on:
-      - postgres
     external_links:
       - postgres:postgres
       - adminer:adminer
