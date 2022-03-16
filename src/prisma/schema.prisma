@@ -95,12 +95,12 @@ model Quiz {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  answers QuizAnswer[]
-  chapter Chapter      @relation(fields: [chapterId], references: [id])
+  answers Choice[]
+  chapter Chapter  @relation(fields: [chapterId], references: [id])
   @@index([id, chapterId])
 }
 
-model QuizAnswer {
+model Choice {
   id        String   @id @default(uuid())
   answer    String   @default("")
   isCorrect Boolean  @default(false)
@@ -110,4 +110,5 @@ model QuizAnswer {
 
   quiz Quiz @relation(fields: [quizId], references: [id])
   @@index([id, quizId])
+  @@map("QuizAnswer")
 }

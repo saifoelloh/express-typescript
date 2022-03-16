@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { NextFunction, Request, Response } from 'express';
-import { QuizAnswer } from '@prisma/client';
+import { Choice } from '@prisma/client';
 
 import { HttpException } from '@/exceptions/HttpException';
 import { Pagination } from '@/interfaces/shared.interface';
@@ -22,8 +22,8 @@ class ChoiceController {
         filter = JSON.parse(req.query.filter as string);
       }
 
-      const chapters: [QuizAnswer[], number] = await this.choiceService.findAllChoice(
-        pagination as Pagination<QuizAnswer>,
+      const chapters: [Choice[], number] = await this.choiceService.findAllChoice(
+        pagination as Pagination<Choice>,
         filter,
       );
       res.status(200).json({ data: chapters, message: 'findAll' });
@@ -34,7 +34,7 @@ class ChoiceController {
 
   public getChoiceById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const choice: QuizAnswer = await this.choiceService.findChoiceBy({
+      const choice: Choice = await this.choiceService.findChoiceBy({
         key: 'id',
         value: req.params.id,
       });
@@ -49,7 +49,7 @@ class ChoiceController {
   public createChoice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const body = req.body as CreateChoiceDto;
     try {
-      const choice: QuizAnswer = await this.choiceService.createChoice(body);
+      const choice: Choice = await this.choiceService.createChoice(body);
       res.status(201).json({ data: choice, message: 'created' });
     } catch (error) {
       next(error);
@@ -59,13 +59,13 @@ class ChoiceController {
   public updateChoice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const body = req.body as CreateChoiceDto;
     try {
-      const findChoice: QuizAnswer = await this.choiceService.findChoiceBy({
+      const findChoice: Choice = await this.choiceService.findChoiceBy({
         key: 'id',
         value: req.params.id,
       });
       if (_.isEmpty(findChoice)) throw new HttpException(404, 'Not Found');
 
-      const choice: QuizAnswer = await this.choiceService.updateChoice(findChoice.id, body);
+      const choice: Choice = await this.choiceService.updateChoice(findChoice.id, body);
       res.status(200).json({ data: choice, message: 'updated' });
     } catch (error) {
       next(error);
@@ -74,7 +74,7 @@ class ChoiceController {
 
   public deleteChoice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findChoice: QuizAnswer = await this.choiceService.findChoiceBy({
+      const findChoice: Choice = await this.choiceService.findChoiceBy({
         key: 'id',
         value: req.params.id,
       });
