@@ -104,6 +104,11 @@ class UsersController {
       next(error);
     }
   };
+
+  public returnCurrentUser = (req: Request, res: Response) => {
+    const user = req.user as User;
+    return res.status(200).json({ user });
+  };
 }
 
 export default UsersController;
