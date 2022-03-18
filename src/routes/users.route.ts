@@ -5,11 +5,13 @@ import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import authMw from '@/middlewares/auth.middleware';
 import { imageUploadMw } from '@/middlewares/media.middleware';
+import OrderController from '@/controllers/orders.controller';
 
 class UsersRoute implements Routes {
-  public path = '/users';
-  public router = Router();
-  public usersController = new UsersController();
+  readonly path = '/users';
+  readonly router = Router();
+  readonly usersController = new UsersController();
+  readonly orderController = new OrderController();
 
   constructor() {
     this.initializeRoutes();
@@ -28,6 +30,10 @@ class UsersRoute implements Routes {
       this.usersController.updateUserById,
     );
     this.router.delete(`${this.path}/:id`, authMw(), this.usersController.deleteUserById);
+
+    // ORDER ROUTE
+    this.router.get(`${this.path}/:userId/orders`, authMw(), this.orderController.getOrders);
+    this.router.get(`${this.path}/:userId/orders/:orderId`, authMw(), this.orderController.getOrderById);
   }
 }
 

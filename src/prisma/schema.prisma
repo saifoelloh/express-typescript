@@ -33,7 +33,9 @@ model User {
   updatedAt DateTime @updatedAt
 
   courses Course[]
+  orders  Order[]
   image   Image?   @relation(fields: [imageId], references: [id])
+
   @@index([id, imageId])
 }
 
@@ -58,7 +60,6 @@ model Course {
   images     Image[]
   categories Category[]
   chapters   Chapter[]
-
   @@index([id, coordinatorId])
 }
 
@@ -110,5 +111,14 @@ model Choice {
 
   quiz Quiz @relation(fields: [quizId], references: [id])
   @@index([id, quizId])
-  @@map("QuizAnswer")
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  @@index([id, userId])
 }
