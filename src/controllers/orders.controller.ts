@@ -33,10 +33,10 @@ class OrderController {
     }
   };
 
-  public createChoice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const body = req.body as CreateOrderDto;
+  public createOrder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const orderData = req.body.order as CreateOrderDto;
     try {
-      const choice: Order = await this.orderService.createOrder(body);
+      const choice: Order = await this.orderService.createOrder(orderData);
       res.status(201).json({ data: choice, message: 'created' });
     } catch (error) {
       next(error);
